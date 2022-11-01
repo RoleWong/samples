@@ -12,10 +12,14 @@ import 'package:flutter_module/push.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:tim_ui_kit/business_logic/view_models/tui_chat_global_model.dart';
 import 'package:tim_ui_kit/tim_ui_kit.dart';
+import 'package:tim_ui_kit/ui/controller/tim_uikit_chat_controller.dart';
 import 'package:tim_ui_kit_calling_plugin/model/TIMUIKitCallingListener.dart';
-import 'package:tim_ui_kit_push_plugin/tim_ui_kit_push_plugin.dart';
 import 'package:tim_ui_kit_calling_plugin/tim_ui_kit_calling_plugin.dart';
+import 'package:tim_ui_kit_push_plugin/model/appInfo.dart';
+
+import 'chat.dart';
 
 /// The entrypoint for the flutter module.
 void main() {
@@ -55,16 +59,15 @@ class ChatInfo {
 /// value of the counter.
 class ChatInfoModel extends ChangeNotifier {
   final CoreServicesImpl _coreInstance = TIMUIKitCore.getInstance();
-  final V2TIMManager _sdkInstance = TIMUIKitCore.getSDKInstance();
-  final ChannelPush channelPush = ChannelPush();
-  final PushAppInfo appInfo = PushAppInfo(
-      apple_buz_id: 35763
-  );
-
-  final push = TimUiKitPushPlugin(isUseGoogleFCM: false);
   final TUICalling _calling = TUICalling();
   late TUICallingListener _onRtcListener;
   final Lock lock = Lock();
+  final _channel = const MethodChannel('com.tencent.chat/add-to-ios');
+  final TIMUIKitChatController _timuiKitChatController =
+  TIMUIKitChatController();
+  final PushAppInfo appInfo = PushAppInfo(
+      apple_buz_id: 35763
+  );
 
   ChatInfoModel() {
     _channel.setMethodCallHandler(_handleMessage);
@@ -75,11 +78,17 @@ class ChatInfoModel extends ChangeNotifier {
     });
   }
 
-  final _channel = const MethodChannel('com.tencent.chat/add-to-ios');
-
   ChatInfo? _chatInfo;
-
+  Map<String, dynamic>? _notificationMap;
   bool _isInit = false;
+  BuildContext? context;
+
+  Map<String, dynamic>? get notificationMap => _notificationMap;
+
+  set notificationMap(Map<String, dynamic>? value) {
+    _notificationMap = value;
+    notifyListeners();
+  }
 
   bool get isInit => _isInit;
 
@@ -92,10 +101,11 @@ class ChatInfoModel extends ChangeNotifier {
     _chatInfo = value;
     notifyListeners();
     if(value != null && value.sdkappid != null && value.userID != null && value.userSig != null){
-
       Future.delayed(const Duration(seconds: 0), () => initChat());
     }
   }
+
+  ChatInfo? get chatInfo => _chatInfo;
 
   Future<void> initChat() async {
     await lock.synchronized(() async {
@@ -112,22 +122,14 @@ class ChatInfoModel extends ChangeNotifier {
       if (res.code == 0) {
         isInit = true;
       }
-      print("init calling");
       await _calling.init(
           sdkAppID: int.parse(_chatInfo!.sdkappid!),
           userID: _chatInfo!.userID!,
           userSig: _chatInfo!.userSig!);
       _calling.setCallingListener(_onRtcListener);
-      await ChannelPush.init((msg) {
-        print("Push Click ${msg}");
-      }, appInfo);
-
-      final tokenRes = await ChannelPush.uploadToken(appInfo);
-      print("Push Upload Result ${tokenRes}");
+      initPush();
     });
   }
-
-  ChatInfo? get chatInfo => _chatInfo;
 
   Future<dynamic> _handleMessage(MethodCall call) async {
     if (call.method == 'reportChatInfo') {
@@ -138,6 +140,62 @@ class ChatInfoModel extends ChangeNotifier {
       }catch(e){
         print("error ${e.toString()}");
       }
+    }else if (call.method == 'notification') {
+      final jsonString = call.arguments as String;
+      try{
+        notificationMap = jsonDecode(jsonString) as Map<String, dynamic>;
+      }catch(e){
+        print("error ${e.toString()}");
+      }
+    }
+  }
+
+  Future<void> initPush() async {
+    Future.delayed(const Duration(milliseconds: 10), () async {
+      await ChannelPush.init((msg) {
+        print("Push Click $msg");
+        handleClickNotification(msg);
+      }, appInfo);
+
+      final tokenRes = await ChannelPush.uploadToken(appInfo);
+      print("Push Upload Result $tokenRes");
+    });
+  }
+
+  String? _getConvID(V2TimConversation conversation) {
+    return conversation.type == 1 ? conversation.userID : conversation.groupID;
+  }
+
+  ConvType _getConvType(V2TimConversation conversation) {
+    return conversation.type == 1 ? ConvType.c2c : ConvType.group;
+  }
+
+  Future<void> handleClickNotification(Map<String, dynamic> msg) async {
+    String ext = msg['ext'] as String? ?? "";
+    Map<String, dynamic> extMsp = jsonDecode(ext) as Map<String, dynamic>;
+    String convId = extMsp["conversationID"] as String? ?? "";
+    final currentConvID = _timuiKitChatController.getCurrentConversation();
+    if (convId.split("_").length < 2 || currentConvID == convId.split("_")[1]) {
+      return;
+    }
+    final targetConversationRes = await TencentImSDKPlugin.v2TIMManager
+        .getConversationManager()
+        .getConversation(conversationID: convId);
+
+    V2TimConversation? targetConversation = targetConversationRes.data;
+
+    if (targetConversation != null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        Navigator.push<void>(
+            context!,
+            MaterialPageRoute(
+              builder: (context) => Chat(
+                conversationID: _getConvID(targetConversation) ?? "",
+                conversationType: _getConvType(targetConversation),
+                conversationShowName: targetConversation.showName ?? "Chat",
+              ),
+            ));
+      });
     }
   }
 }
@@ -169,6 +227,8 @@ class FullScreenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ChatInfoModel chatInfoModel = Provider.of<ChatInfoModel>(context);
+    chatInfoModel.context ??= context;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tencent Cloud Chat'),
@@ -186,9 +246,8 @@ class Contents extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaInfo = MediaQuery.of(context);
     final ChatInfoModel chatInfoModel = Provider.of<ChatInfoModel>(context);
-    final ChatInfo? chatInfo = chatInfoModel.chatInfo;
+    chatInfoModel.context ??= context;
     final bool isInit = chatInfoModel.isInit;
-
     return SizedBox.expand(
       child: Stack(
         children: [

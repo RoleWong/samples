@@ -32,6 +32,7 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
     
     override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let content = response.notification.request.content
+        
     }
     
 }
