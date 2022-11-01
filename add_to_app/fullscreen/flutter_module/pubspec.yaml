@@ -16,6 +16,7 @@ dependencies:
   tim_ui_kit:
     path: /Users/wangrunlin/Documents/GitHub/im-flutter-uikit/package_src/tim_ui_kit
   tim_ui_kit_calling_plugin: ^0.4.6
+  synchronized: ^3.0.0+3
 
 dev_dependencies:
   flutter_test:

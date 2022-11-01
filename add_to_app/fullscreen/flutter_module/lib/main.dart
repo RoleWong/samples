@@ -11,6 +11,7 @@ import 'package:flutter_module/conversation.dart';
 import 'package:flutter_module/push.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:tim_ui_kit/tim_ui_kit.dart';
 import 'package:tim_ui_kit_calling_plugin/model/TIMUIKitCallingListener.dart';
 import 'package:tim_ui_kit_push_plugin/tim_ui_kit_push_plugin.dart';
@@ -63,6 +64,7 @@ class ChatInfoModel extends ChangeNotifier {
   final push = TimUiKitPushPlugin(isUseGoogleFCM: false);
   final TUICalling _calling = TUICalling();
   late TUICallingListener _onRtcListener;
+  final Lock lock = Lock();
 
   ChatInfoModel() {
     _channel.setMethodCallHandler(_handleMessage);
@@ -90,35 +92,39 @@ class ChatInfoModel extends ChangeNotifier {
     _chatInfo = value;
     notifyListeners();
     if(value != null && value.sdkappid != null && value.userID != null && value.userSig != null){
+
       Future.delayed(const Duration(seconds: 0), () => initChat());
     }
   }
 
   Future<void> initChat() async {
-    if(isInit){
-      return;
-    }
-    await _coreInstance.init(
-        sdkAppID: int.parse(_chatInfo!.sdkappid!),
-        loglevel: LogLevelEnum.V2TIM_LOG_DEBUG,
-        onTUIKitCallbackListener: (callbackValue) {},
-        listener: V2TimSDKListener());
-    final res = await _coreInstance.login(
-        userID: _chatInfo!.userID!, userSig: _chatInfo!.userSig!);
-    if (res.code == 0) {
-      isInit = true;
-    }
-    await _calling.init(
-        sdkAppID: int.parse(_chatInfo!.sdkappid!),
-        userID: _chatInfo!.userID!,
-        userSig: _chatInfo!.userSig!);
-    _calling.setCallingListener(_onRtcListener);
-    await ChannelPush.init((msg) {
-      print("Push Click ${msg}");
-    }, appInfo);
+    await lock.synchronized(() async {
+      if(isInit){
+        return;
+      }
+      await _coreInstance.init(
+          sdkAppID: int.parse(_chatInfo!.sdkappid!),
+          loglevel: LogLevelEnum.V2TIM_LOG_DEBUG,
+          onTUIKitCallbackListener: (callbackValue) {},
+          listener: V2TimSDKListener());
+      final res = await _coreInstance.login(
+          userID: _chatInfo!.userID!, userSig: _chatInfo!.userSig!);
+      if (res.code == 0) {
+        isInit = true;
+      }
+      print("init calling");
+      await _calling.init(
+          sdkAppID: int.parse(_chatInfo!.sdkappid!),
+          userID: _chatInfo!.userID!,
+          userSig: _chatInfo!.userSig!);
+      _calling.setCallingListener(_onRtcListener);
+      await ChannelPush.init((msg) {
+        print("Push Click ${msg}");
+      }, appInfo);
 
-    final tokenRes = await ChannelPush.uploadToken(appInfo);
-    print("Push Upload Result ${tokenRes}");
+      final tokenRes = await ChannelPush.uploadToken(appInfo);
+      print("Push Upload Result ${tokenRes}");
+    });
   }
 
   ChatInfo? get chatInfo => _chatInfo;
