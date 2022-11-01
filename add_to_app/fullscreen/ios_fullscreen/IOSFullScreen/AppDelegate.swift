@@ -4,18 +4,34 @@
 
 import UIKit
 import Flutter
+// Used to connect plugins (only if you have plugins with iOS platform code).
+import FlutterPluginRegistrant
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
+class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
+  lazy var flutterEngine = FlutterEngine(name: "io.flutter")
 
-    var flutterEngine : FlutterEngine?
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Instantiate Flutter engine
-        self.flutterEngine = FlutterEngine(name: "io.flutter", project: nil)
-        self.flutterEngine?.run(withEntrypoint: nil)
-
-        return true
+  override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+      
+      if #available(iOS 10.0, *) {
+        UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+      }
+      
+      if let remoteNotification = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification]{
+          // 处理用户收到推送后的响应
+          
+//     NotificationUtil.shared.handleUserResponse(userInfo:removePushUserInfo as! [AnyHashable:Any])
+      }
+      
+    // Runs the default Dart entrypoint with a default Flutter route.
+    flutterEngine.run();
+    // Used to connect plugins (only if you have plugins with iOS platform code).
+    GeneratedPluginRegistrant.register(with: self.flutterEngine);
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions);
+  }
+    
+    override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let content = response.notification.request.content
     }
+    
 }

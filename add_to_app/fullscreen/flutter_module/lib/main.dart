@@ -2,9 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_module/conversation.dart';
+import 'package:flutter_module/push.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:tim_ui_kit/tim_ui_kit.dart';
+import 'package:tim_ui_kit_calling_plugin/model/TIMUIKitCallingListener.dart';
+import 'package:tim_ui_kit_push_plugin/tim_ui_kit_push_plugin.dart';
+import 'package:tim_ui_kit_calling_plugin/tim_ui_kit_calling_plugin.dart';
 
 /// The entrypoint for the flutter module.
 void main() {
@@ -12,7 +22,7 @@ void main() {
   // MethodChannel-based model.
   WidgetsFlutterBinding.ensureInitialized();
 
-  final model = CounterModel();
+  final model = ChatInfoModel();
 
   runApp(
     ChangeNotifierProvider.value(
@@ -22,6 +32,19 @@ void main() {
   );
 }
 
+class ChatInfo {
+  String? sdkappid;
+  String? userSig;
+  String? userID;
+
+  ChatInfo.fromJSON(Map<String, dynamic> json) {
+    sdkappid = json["sdkappid"].toString();
+    userSig = json["userSig"].toString();
+    userID = json["userID"].toString();
+  }
+
+}
+
 /// A simple model that uses a [MethodChannel] as the source of truth for the
 /// state of a counter.
 ///
@@ -29,26 +52,86 @@ void main() {
 /// the native portions of the app can't access it), this module passes messages
 /// back to the containing app whenever it needs to increment or retrieve the
 /// value of the counter.
-class CounterModel extends ChangeNotifier {
-  CounterModel() {
+class ChatInfoModel extends ChangeNotifier {
+  final CoreServicesImpl _coreInstance = TIMUIKitCore.getInstance();
+  final V2TIMManager _sdkInstance = TIMUIKitCore.getSDKInstance();
+  final ChannelPush channelPush = ChannelPush();
+  final PushAppInfo appInfo = PushAppInfo(
+      apple_buz_id: 35763
+  );
+
+  final push = TimUiKitPushPlugin(isUseGoogleFCM: false);
+  final TUICalling _calling = TUICalling();
+  late TUICallingListener _onRtcListener;
+
+  ChatInfoModel() {
     _channel.setMethodCallHandler(_handleMessage);
-    _channel.invokeMethod<void>('requestCounter');
+    _channel.invokeMethod<void>('requestChatInfo');
+    _onRtcListener = TUICallingListener(onInvited:
+        (params) {
+      _channel.invokeMethod<void>('launchChat');
+    });
   }
 
-  final _channel = const MethodChannel('dev.flutter.example/counter');
+  final _channel = const MethodChannel('com.tencent.chat/add-to-ios');
 
-  int _count = 0;
+  ChatInfo? _chatInfo;
 
-  int get count => _count;
+  bool _isInit = false;
 
-  void increment() {
-    _channel.invokeMethod<void>('incrementCounter');
+  bool get isInit => _isInit;
+
+  set isInit(bool value) {
+    _isInit = value;
+    notifyListeners();
   }
+
+  set chatInfo(ChatInfo? value) {
+    _chatInfo = value;
+    notifyListeners();
+    if(value != null && value.sdkappid != null && value.userID != null && value.userSig != null){
+      Future.delayed(const Duration(seconds: 0), () => initChat());
+    }
+  }
+
+  Future<void> initChat() async {
+    if(isInit){
+      return;
+    }
+    await _coreInstance.init(
+        sdkAppID: int.parse(_chatInfo!.sdkappid!),
+        loglevel: LogLevelEnum.V2TIM_LOG_DEBUG,
+        onTUIKitCallbackListener: (callbackValue) {},
+        listener: V2TimSDKListener());
+    final res = await _coreInstance.login(
+        userID: _chatInfo!.userID!, userSig: _chatInfo!.userSig!);
+    if (res.code == 0) {
+      isInit = true;
+    }
+    await _calling.init(
+        sdkAppID: int.parse(_chatInfo!.sdkappid!),
+        userID: _chatInfo!.userID!,
+        userSig: _chatInfo!.userSig!);
+    _calling.setCallingListener(_onRtcListener);
+    await ChannelPush.init((msg) {
+      print("Push Click ${msg}");
+    }, appInfo);
+
+    final tokenRes = await ChannelPush.uploadToken(appInfo);
+    print("Push Upload Result ${tokenRes}");
+  }
+
+  ChatInfo? get chatInfo => _chatInfo;
 
   Future<dynamic> _handleMessage(MethodCall call) async {
-    if (call.method == 'reportCounter') {
-      _count = call.arguments as int;
-      notifyListeners();
+    if (call.method == 'reportChatInfo') {
+      final jsonString = call.arguments as String;
+      try{
+        final Map<String, dynamic> chatInfoMap = jsonDecode(jsonString) as Map<String, dynamic>;
+        chatInfo = ChatInfo.fromJSON(chatInfoMap);
+      }catch(e){
+        print("error ${e.toString()}");
+      }
     }
   }
 }
@@ -63,7 +146,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Module Title',
+      title: 'Tencent Cloud Chat',
+      navigatorKey: TUICalling.navigatorKey,
       routes: {
         '/': (context) => const FullScreenView(),
         '/mini': (context) => const Contents(),
@@ -81,26 +165,23 @@ class FullScreenView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Full-screen Flutter'),
+        title: const Text('Tencent Cloud Chat'),
       ),
-      body: const Contents(showExit: true),
+      body: const Contents(),
     );
   }
 }
 
-/// The actual content displayed by the module.
-///
-/// This widget displays info about the state of a counter and how much room (in
-/// logical pixels) it's been given. It also offers buttons to increment the
-/// counter and (optionally) close the Flutter view.
 class Contents extends StatelessWidget {
-  final bool showExit;
 
-  const Contents({this.showExit = false, super.key});
+  const Contents({super.key});
 
   @override
   Widget build(BuildContext context) {
     final mediaInfo = MediaQuery.of(context);
+    final ChatInfoModel chatInfoModel = Provider.of<ChatInfoModel>(context);
+    final ChatInfo? chatInfo = chatInfoModel.chatInfo;
+    final bool isInit = chatInfoModel.isInit;
 
     return SizedBox.expand(
       child: Stack(
@@ -112,52 +193,13 @@ class Contents extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned.fill(
-            child: Opacity(
-              opacity: .25,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: FlutterLogo(),
-              ),
-            ),
+          if(!isInit) Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.grey,
+                size: 40,
+              )
           ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Window is ${mediaInfo.size.width.toStringAsFixed(1)} x '
-                  '${mediaInfo.size.height.toStringAsFixed(1)}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 16),
-                Consumer<CounterModel>(
-                  builder: (context, model, child) {
-                    return Text(
-                      'Taps: ${model.count}',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Consumer<CounterModel>(
-                  builder: (context, model, child) {
-                    return ElevatedButton(
-                      onPressed: () => model.increment(),
-                      child: const Text('Tap me!'),
-                    );
-                  },
-                ),
-                if (showExit) ...[
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => SystemNavigator.pop(animated: true),
-                    child: const Text('Exit this screen'),
-                  ),
-                ],
-              ],
-            ),
-          ),
+          if(isInit) const Conversation()
         ],
       ),
     );
