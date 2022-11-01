@@ -83,13 +83,6 @@ class ChatInfoModel extends ChangeNotifier {
   bool _isInit = false;
   BuildContext? context;
 
-  Map<String, dynamic>? get notificationMap => _notificationMap;
-
-  set notificationMap(Map<String, dynamic>? value) {
-    _notificationMap = value;
-    notifyListeners();
-  }
-
   bool get isInit => _isInit;
 
   set isInit(bool value) {
@@ -143,7 +136,7 @@ class ChatInfoModel extends ChangeNotifier {
     }else if (call.method == 'notification') {
       final jsonString = call.arguments as String;
       try{
-        notificationMap = jsonDecode(jsonString) as Map<String, dynamic>;
+        await handleClickNotification(jsonDecode(jsonString) as Map<String, dynamic>);
       }catch(e){
         print("error ${e.toString()}");
       }
