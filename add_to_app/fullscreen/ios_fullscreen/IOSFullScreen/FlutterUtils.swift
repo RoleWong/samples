@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Flutter
+import FlutterPluginRegistrant
 import Photos
 
 struct ChatInfo: Codable {
@@ -30,7 +31,11 @@ class FlutterUtils: NSObject {
 
     static let shared = FlutterUtils()
     
-    var methodChannel : FlutterMethodChannel?
+    var chatMethodChannel : FlutterMethodChannel?
+    var callingMethodChannel : FlutterMethodChannel?
+    var chatFlutterEngine : FlutterEngine?
+    var callingFlutterEngine : FlutterEngine?
+    
     var chatInfo: ChatInfo = ChatInfo()
     var mainView: UIViewController?
     
@@ -38,23 +43,31 @@ class FlutterUtils: NSObject {
     // Should not init or copy outside
     private override init() {
         super.init()
-        if let flutterEngine = (UIApplication.shared.delegate as? AppDelegate)?.flutterEngine {
-            methodChannel = FlutterMethodChannel(name: "com.tencent.chat/add-to-ios",
-                                                 binaryMessenger: flutterEngine.binaryMessenger)
-            methodChannel?.setMethodCallHandler({ [weak self]
-                (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-                if let strongSelf = self {
-                    switch(call.method) {
-                    case "requestChatInfo":
-                        strongSelf.reportChatInfo()
-                    case "launchChat":
-                        strongSelf.launchChatFunc()
-                    default:
-                        print("Unrecognized method name: \(call.method)")
-                    }
+        let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        
+        // Flutter - Chat
+        chatFlutterEngine = appDelegate.flutterEngines.makeEngine(withEntrypoint: "chatMain", libraryURI: nil)
+        GeneratedPluginRegistrant.register(with: chatFlutterEngine!)
+        chatMethodChannel = FlutterMethodChannel(name: "com.tencent.chat/add-to-ios",
+                                                 binaryMessenger: chatFlutterEngine!.binaryMessenger)
+        chatMethodChannel?.setMethodCallHandler({ [weak self]
+            (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            if let strongSelf = self {
+                switch(call.method) {
+                case "requestChatInfo":
+                    strongSelf.reportChatInfo()
+                case "launchChat":
+                    strongSelf.launchChatFunc()
+                default:
+                    print("Unrecognized method name: \(call.method)")
                 }
-            })
-        }
+            }
+        })
+        
+        // Flutter - Calling
+        
+        
+        
     }
     
     override func copy() -> Any {
@@ -70,20 +83,18 @@ class FlutterUtils: NSObject {
     }
     
     func reportChatInfo() {
-        methodChannel?.invokeMethod("reportChatInfo", arguments: chatInfo.toJSONString())
+        chatMethodChannel?.invokeMethod("reportChatInfo", arguments: chatInfo.toJSONString())
     }
     
     func launchChatFunc(){
-        if let flutterEngine = (UIApplication.shared.delegate as? AppDelegate)?.flutterEngine {
-            if(flutterEngine.viewController == nil){
-                let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
-                mainView?.present(flutterViewController, animated: true, completion: nil)
-            }
+        if self.chatFlutterEngine != nil && self.chatFlutterEngine!.viewController == nil {
+            let flutterViewController = FlutterViewController(engine: self.chatFlutterEngine!, nibName: nil, bundle: nil)
+            mainView?.present(flutterViewController, animated: true, completion: nil)
         }
     }
     
     func triggerNotification(msg: String){
         launchChatFunc()
-        methodChannel?.invokeMethod("notification", arguments: msg)
+        chatMethodChannel?.invokeMethod("notification", arguments: msg)
     }
 }

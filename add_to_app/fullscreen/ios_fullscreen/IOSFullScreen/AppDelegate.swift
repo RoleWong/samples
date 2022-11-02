@@ -20,7 +20,7 @@ extension Dictionary {
 
 @UIApplicationMain
 class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
-  lazy var flutterEngine = FlutterEngine(name: "io.flutter")
+  lazy var flutterEngines = FlutterEngineGroup(name: "chat.flutter.tencent", project: nil)
 
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
       
@@ -29,16 +29,15 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
       }
       
       if let remoteNotification = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification]{
-          // 处理用户收到推送后的响应
           let notificationExt: [AnyHashable:Any] = remoteNotification as! [AnyHashable:Any]
           let remoteNotificationString: String = notificationExt.jsonStringRepresentaiton ?? "{}"
           FlutterUtils.shared.triggerNotification(msg: remoteNotificationString)
       }
       
     // Runs the default Dart entrypoint with a default Flutter route.
-    flutterEngine.run();
+//    flutterEngine.run();
     // Used to connect plugins (only if you have plugins with iOS platform code).
-    GeneratedPluginRegistrant.register(with: self.flutterEngine);
+//    GeneratedPluginRegistrant.register(with: self.flutterEngines);
     return super.application(application, didFinishLaunchingWithOptions: launchOptions);
   }
     

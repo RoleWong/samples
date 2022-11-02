@@ -21,8 +21,25 @@ import 'package:tim_ui_kit_push_plugin/model/appInfo.dart';
 
 import 'chat.dart';
 
-/// The entrypoint for the flutter module.
+@pragma('vm:entry-point')
 void main() {
+  // This call ensures the Flutter binding has been set up before creating the
+  // MethodChannel-based model.
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final model = ChatInfoModel();
+
+  runApp(
+    ChangeNotifierProvider.value(
+      value: model,
+      child: const MyApp(),
+    ),
+  );
+}
+
+/// The entrypoint for the flutter module.
+@pragma('vm:entry-point')
+void chatMain() {
   // This call ensures the Flutter binding has been set up before creating the
   // MethodChannel-based model.
   WidgetsFlutterBinding.ensureInitialized();

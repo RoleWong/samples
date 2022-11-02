@@ -113,6 +113,7 @@
 				0D61B1DB25BB8A2300A1A590 /* Frameworks */,
 				0D61B1DC25BB8A2300A1A590 /* Resources */,
 				D93C82A75960A3ABB9D69453 /* [CP] Embed Pods Frameworks */,
+				17C8BF68D39A0E8AF5CED9C9 /* [CP-User] Embed Flutter Build multiple_flutters_module Script */,
 			);
 			buildRules = (
 			);
@@ -169,6 +170,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		17C8BF68D39A0E8AF5CED9C9 /* [CP-User] Embed Flutter Build multiple_flutters_module Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Embed Flutter Build multiple_flutters_module Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../multiple_flutters_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
+		};
 		3BC074A3AF94322EF6E73F8B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

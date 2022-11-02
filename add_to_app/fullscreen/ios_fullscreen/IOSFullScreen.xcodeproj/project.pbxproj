@@ -62,6 +62,7 @@
 		AA0D75F9290BC5B400266F59 /* IOSFullScreen.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IOSFullScreen.entitlements; sourceTree = "<group>"; };
 		AA17B319290784C4003DC4FB /* 240*240 IM icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "240*240 IM icon.png"; sourceTree = "<group>"; };
 		AAEA5B8A2910F7FE00E05C5B /* FlutterUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlutterUtils.swift; sourceTree = "<group>"; };
+		AAEA5B9829126E8F00E05C5B /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; };
 		C0DF5C25244C5FBF2163E9CA /* Pods_IOSFullScreenTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IOSFullScreenTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C934F72735B4EEEBBA151C52 /* Pods-IOSFullScreenTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IOSFullScreenTests.release.xcconfig"; path = "Target Support Files/Pods-IOSFullScreenTests/Pods-IOSFullScreenTests.release.xcconfig"; sourceTree = "<group>"; };
 		F7C79901251EF65800650C20 /* Info-Release.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-Release.plist"; sourceTree = "<group>"; };
@@ -155,6 +156,7 @@
 		43C5451D39DA3D51EFD818D6 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
+				AAEA5B9829126E8F00E05C5B /* Podfile */,
 				48BBC427DCC612A2304FEE95 /* Pods-IOSFullScreen.debug.xcconfig */,
 				71F86A6328438F2F13A47D14 /* Pods-IOSFullScreen.release.xcconfig */,
 				3736B41014D97C09900D2CB6 /* Pods-IOSFullScreenTests.debug.xcconfig */,
