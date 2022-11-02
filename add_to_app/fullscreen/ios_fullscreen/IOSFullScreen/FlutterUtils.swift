@@ -13,8 +13,8 @@ import Photos
 
 struct ChatInfo: Codable {
     var sdkappid: String = "1400187352"
-    var userSig: String = "eJwtjNEKgjAYRt9l1yH-Nrc1oZtAFiMKppG3gtN*oppmIUTvnqnf3XcOnA-J91n09h1JCIuArKaPlb-3WOOEKUAsuOSLe1bXMgSsSEJjALpWXLDZ9HjzI5VSMQ2KiZn6IWA3cgn-LQ1sxrDP09aEBz8O5rQtnDlc2rPNito1u5d2QQffc2WstGW6Id8ftfwweg__"
-    var userID: String = "10045363"
+    var userSig: String = "eJyrVgrxCdYrSy1SslIy0jNQ0gHzM1NS80oy0zLBwpam5gYWpqZGFlDJ4pTsxIKCzBQlK0MTAwNDC3NjUyOITElmbipQ1MzM3NjCwgwmmlpRkFkEFDczAAGoGZnpQJNDk4NMQtzKyv2NIw0qMsJTEwMtzJ1cQjwLMx3NK0rDyoudKz0zU1MCClzTbZVqAeX7MVM_"
+    var userID: String = "957085528"
 }
 
 public extension Encodable {

@@ -21,7 +21,6 @@ import 'package:tim_ui_kit_push_plugin/model/appInfo.dart';
 
 import 'chat.dart';
 
-@pragma('vm:entry-point')
 void main() {
   // This call ensures the Flutter binding has been set up before creating the
   // MethodChannel-based model.
@@ -32,9 +31,26 @@ void main() {
   runApp(
     ChangeNotifierProvider.value(
       value: model,
-      child: const MyApp(),
+      child: const MainAPP(color: Colors.blue),
     ),
   );
+}
+
+class MainAPP extends StatelessWidget {
+  const MainAPP({super.key, required this.color});
+
+  final MaterialColor color;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: color,
+      ),
+      home: Container(),
+    );
+  }
 }
 
 /// The entrypoint for the flutter module.
