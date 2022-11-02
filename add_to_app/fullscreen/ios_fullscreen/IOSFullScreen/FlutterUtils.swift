@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import Flutter
 import Photos
+import ImSDK_Plus
 
 struct ChatInfo: Codable {
     var sdkappid: String = "1400187352"
@@ -16,7 +17,7 @@ struct ChatInfo: Codable {
     var userID: String = "10045363"
 }
 
-public extension Encodable {
+public extension Encodable {qing
     func toJSONString() -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -33,6 +34,7 @@ class FlutterUtils: NSObject {
     var methodChannel : FlutterMethodChannel?
     var chatInfo: ChatInfo = ChatInfo()
     var mainView: UIViewController?
+    var isLoginSuccess: Bool = false
     
     // Make sure the class has only one instance
     // Should not init or copy outside
@@ -45,8 +47,6 @@ class FlutterUtils: NSObject {
                 (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
                 if let strongSelf = self {
                     switch(call.method) {
-                    case "requestChatInfo":
-                        strongSelf.reportChatInfo()
                     case "launchChat":
                         strongSelf.launchChatFunc()
                     default:
@@ -69,11 +69,39 @@ class FlutterUtils: NSObject {
         self.mainView = mainViewController
     }
     
+    func initTencentChat(){
+        if(isLoginSuccess == true){
+            return
+        }
+        let data = V2TIMManager.sharedInstance().initSDK(1400187352, config: nil);
+        if (data == true){
+            V2TIMManager.sharedInstance().login(
+                chatInfo.userID,
+                userSig: chatInfo.userSig,
+                succ: {
+                    self.isLoginSuccess = true
+                    self.reportChatInfo()
+                },
+                fail: onLoginFailed()
+            )
+        }
+        
+    }
+    
+    func onLoginFailed() -> V2TIMFail{
+        return {
+                   (code: Int32, desc: Optional<String>) -> Void in
+               }
+    }
+    
     func reportChatInfo() {
         methodChannel?.invokeMethod("reportChatInfo", arguments: chatInfo.toJSONString())
     }
     
     func launchChatFunc(){
+        if(isLoginSuccess == false){
+            initTencentChat()
+        }
         if let flutterEngine = (UIApplication.shared.delegate as? AppDelegate)?.flutterEngine {
             if(flutterEngine.viewController == nil){
                 let flutterViewController = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)

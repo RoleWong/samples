@@ -11,12 +11,11 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         FlutterUtils.shared.initViewController(mainViewController: self)
-        FlutterUtils.shared.reportChatInfo()
+        FlutterUtils.shared.initTencentChat()
     }
 
 
     @IBAction func launchTUIKit(_ sender: Any) {
-//        self.reportChatInfo()
         FlutterUtils.shared.launchChatFunc()
     }
 }

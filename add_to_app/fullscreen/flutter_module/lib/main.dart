@@ -71,7 +71,6 @@ class ChatInfoModel extends ChangeNotifier {
 
   ChatInfoModel() {
     _channel.setMethodCallHandler(_handleMessage);
-    _channel.invokeMethod<void>('requestChatInfo');
     _onRtcListener = TUICallingListener(onInvited:
         (params) {
       _channel.invokeMethod<void>('launchChat');
@@ -102,31 +101,23 @@ class ChatInfoModel extends ChangeNotifier {
 
   Future<void> initChat() async {
     await lock.synchronized(() async {
-      if(isInit){
+      if (isInit) {
         return;
       }
-      await _coreInstance.init(
-          sdkAppID: int.parse(_chatInfo!.sdkappid!),
-          loglevel: LogLevelEnum.V2TIM_LOG_DEBUG,
-          onTUIKitCallbackListener: (callbackValue) {},
-          listener: V2TimSDKListener());
-      final res = await _coreInstance.login(
-          userID: _chatInfo!.userID!, userSig: _chatInfo!.userSig!);
-      if (res.code == 0) {
-        isInit = true;
-        if (notificationMap != null) {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            handleClickNotification(notificationMap!);
-            notificationMap = null;
-          });
-        }
-      }
+      isInit = true;
+      _coreInstance.setDataFromNative(userId: chatInfo?.userID ?? "");
       await _calling.init(
           sdkAppID: int.parse(_chatInfo!.sdkappid!),
           userID: _chatInfo!.userID!,
           userSig: _chatInfo!.userSig!);
       _calling.setCallingListener(_onRtcListener);
       initPush();
+      if (notificationMap != null) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          handleClickNotification(notificationMap!);
+          notificationMap = null;
+        });
+      }
     });
   }
 

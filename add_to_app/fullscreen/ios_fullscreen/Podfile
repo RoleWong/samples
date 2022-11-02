@@ -10,6 +10,8 @@ target 'IOSFullScreen' do
 
   # Pods for IOSFullScreen
   install_all_flutter_pods(flutter_application_path)
+  
+  pod 'TXIMSDK_Plus_iOS'
 
   target 'IOSFullScreenTests' do
     inherit! :search_paths
