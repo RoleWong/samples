@@ -79,7 +79,7 @@ class ChatInfoModel extends ChangeNotifier {
   }
 
   ChatInfo? _chatInfo;
-  Map<String, dynamic>? _notificationMap;
+  Map<String, dynamic>? notificationMap;
   bool _isInit = false;
   BuildContext? context;
 
@@ -114,6 +114,12 @@ class ChatInfoModel extends ChangeNotifier {
           userID: _chatInfo!.userID!, userSig: _chatInfo!.userSig!);
       if (res.code == 0) {
         isInit = true;
+        if (notificationMap != null) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            handleClickNotification(notificationMap!);
+            notificationMap = null;
+          });
+        }
       }
       await _calling.init(
           sdkAppID: int.parse(_chatInfo!.sdkappid!),
@@ -136,7 +142,12 @@ class ChatInfoModel extends ChangeNotifier {
     }else if (call.method == 'notification') {
       final jsonString = call.arguments as String;
       try{
-        await handleClickNotification(jsonDecode(jsonString) as Map<String, dynamic>);
+        final Map<String, dynamic> notification = jsonDecode(jsonString) as Map<String, dynamic>;
+        if(isInit){
+          await handleClickNotification(jsonDecode(jsonString) as Map<String, dynamic>);
+        }else{
+          notificationMap = notification;
+        }
       }catch(e){
         print("error ${e.toString()}");
       }
