@@ -81,4 +81,8 @@ class FlutterUtils: NSObject {
             }
         }
     }
+    
+    func triggerNotification(msg: String){
+        methodChannel?.invokeMethod("notification", arguments: msg)
+    }
 }

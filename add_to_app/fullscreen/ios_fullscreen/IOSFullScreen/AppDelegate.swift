@@ -7,6 +7,17 @@ import Flutter
 // Used to connect plugins (only if you have plugins with iOS platform code).
 import FlutterPluginRegistrant
 
+extension Dictionary {
+    var jsonStringRepresentaiton: String? {
+        guard let theJSONData = try? JSONSerialization.data(withJSONObject: self,
+                                                            options: [.prettyPrinted]) else {
+            return nil
+        }
+
+        return String(data: theJSONData, encoding: .ascii)
+    }
+}
+
 @UIApplicationMain
 class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
   lazy var flutterEngine = FlutterEngine(name: "io.flutter")
@@ -31,8 +42,10 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
   }
     
     override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let content = response.notification.request.content
-        
+        let notificationExt: Dictionary = response.notification.request.content.userInfo
+        let notificationExtString: String = notificationExt.jsonStringRepresentaiton ?? "{}"
+        FlutterUtils.shared.triggerNotification(msg: notificationExtString)
+        // TODO
     }
     
 }
