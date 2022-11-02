@@ -83,6 +83,7 @@ class FlutterUtils: NSObject {
     }
     
     func triggerNotification(msg: String){
+        launchChatFunc()
         methodChannel?.invokeMethod("notification", arguments: msg)
     }
 }

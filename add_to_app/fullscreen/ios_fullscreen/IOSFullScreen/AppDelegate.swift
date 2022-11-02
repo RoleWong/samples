@@ -30,8 +30,9 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
       
       if let remoteNotification = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification]{
           // 处理用户收到推送后的响应
-          
-//     NotificationUtil.shared.handleUserResponse(userInfo:removePushUserInfo as! [AnyHashable:Any])
+          let notificationExt: [AnyHashable:Any] = remoteNotification as! [AnyHashable:Any]
+          let remoteNotificationString: String = notificationExt.jsonStringRepresentaiton ?? "{}"
+          FlutterUtils.shared.triggerNotification(msg: remoteNotificationString)
       }
       
     // Runs the default Dart entrypoint with a default Flutter route.
@@ -45,7 +46,6 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
         let notificationExt: Dictionary = response.notification.request.content.userInfo
         let notificationExtString: String = notificationExt.jsonStringRepresentaiton ?? "{}"
         FlutterUtils.shared.triggerNotification(msg: notificationExtString)
-        // TODO
     }
     
 }
