@@ -1,7 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 
-flutter_chat_application_path = '../flutter_module'
+flutter_chat_application_path = '../tencent_chat_module'
 load File.join(flutter_chat_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'IOSFullScreen' do

@@ -32,7 +32,8 @@ class FlutterUtils: NSObject {
     static let shared = FlutterUtils()
     
     var chatMethodChannel : FlutterMethodChannel?
-    var callingMethodChannel : FlutterMethodChannel?
+    var callMethodChannel : FlutterMethodChannel?
+    
     var chatFlutterEngine : FlutterEngine?
     var callingFlutterEngine : FlutterEngine?
     
@@ -48,7 +49,7 @@ class FlutterUtils: NSObject {
         // Flutter - Chat
         chatFlutterEngine = appDelegate.flutterEngines.makeEngine(withEntrypoint: "chatMain", libraryURI: nil)
         GeneratedPluginRegistrant.register(with: chatFlutterEngine!)
-        chatMethodChannel = FlutterMethodChannel(name: "com.tencent.chat/add-to-ios",
+        chatMethodChannel = FlutterMethodChannel(name: "com.tencent.flutter.chat",
                                                  binaryMessenger: chatFlutterEngine!.binaryMessenger)
         chatMethodChannel?.setMethodCallHandler({ [weak self]
             (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -56,18 +57,45 @@ class FlutterUtils: NSObject {
                 switch(call.method) {
                 case "requestChatInfo":
                     strongSelf.reportChatInfo()
+                    break
                 case "launchChat":
                     strongSelf.launchChatFunc()
+                    break
+                case "voiceCall":
+                    strongSelf.triggerVoiceCall(callInfo: call.arguments as! String)
+                    break
+                case "videoCall":
+                    strongSelf.triggerVideoCall(callInfo: call.arguments as! String)
+                    break
                 default:
                     print("Unrecognized method name: \(call.method)")
                 }
             }
         })
         
-        // Flutter - Calling
-        
-        
-        
+        // Flutter - Call
+        callingFlutterEngine = appDelegate.flutterEngines.makeEngine(withEntrypoint: "callMain", libraryURI: nil)
+        GeneratedPluginRegistrant.register(with: callingFlutterEngine!)
+        callMethodChannel = FlutterMethodChannel(name: "com.tencent.flutter.call",
+                                                 binaryMessenger: callingFlutterEngine!.binaryMessenger)
+        callMethodChannel?.setMethodCallHandler({ [weak self]
+            (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            if let strongSelf = self {
+                switch(call.method) {
+                case "requestCallInfo":
+                    strongSelf.reportCallInfo()
+                    break
+                case "launchCall":
+                    strongSelf.launchCallFunc()
+                    break
+                case "endCall":
+                    strongSelf.endCallFunc()
+                    break
+                default:
+                    print("Unrecognized method name: \(call.method)")
+                }
+            }
+        })
     }
     
     override func copy() -> Any {
@@ -86,15 +114,42 @@ class FlutterUtils: NSObject {
         chatMethodChannel?.invokeMethod("reportChatInfo", arguments: chatInfo.toJSONString())
     }
     
+    func reportCallInfo() {
+        callMethodChannel?.invokeMethod("reportCallInfo", arguments: chatInfo.toJSONString())
+    }
+    
     func launchChatFunc(){
         if self.chatFlutterEngine != nil && self.chatFlutterEngine!.viewController == nil {
             let flutterViewController = FlutterViewController(engine: self.chatFlutterEngine!, nibName: nil, bundle: nil)
+            self.mainView?.navigationController?.pushViewController(flutterViewController, animated: true)
+        }
+    }
+    
+    func launchCallFunc(){
+        if self.callingFlutterEngine != nil && self.callingFlutterEngine!.viewController == nil {
+            let flutterViewController = FlutterViewController(engine: self.callingFlutterEngine!, nibName: nil, bundle: nil)
             mainView?.present(flutterViewController, animated: true, completion: nil)
+        }
+    }
+    
+    func endCallFunc(){
+        if self.callingFlutterEngine != nil && self.callingFlutterEngine!.viewController != nil {
+            self.callingFlutterEngine!.viewController?.dismiss(animated: true, completion: nil)
         }
     }
     
     func triggerNotification(msg: String){
         launchChatFunc()
         chatMethodChannel?.invokeMethod("notification", arguments: msg)
+    }
+    
+    func triggerVoiceCall(callInfo: String) {
+        callMethodChannel?.invokeMethod("voiceCall", arguments: callInfo)
+        self.launchCallFunc()
+    }
+    
+    func triggerVideoCall(callInfo: String) {
+        callMethodChannel?.invokeMethod("videoCall", arguments: callInfo)
+        self.launchCallFunc()
     }
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_module/main.dart' as app;
+import 'package:tencent_chat_module/main.dart' as app;
 
 // This alternate entrypoint is used for espresso testing. See
 // https://pub.dev/packages/espresso for details.
