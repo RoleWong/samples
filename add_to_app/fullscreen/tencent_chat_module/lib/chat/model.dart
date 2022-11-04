@@ -147,8 +147,6 @@ class ChatInfoModel extends ChangeNotifier {
   }
 
   void triggerVoiceCall(CallInfo callInfo){
-    print("triggerVoiceCall");
-    print("triggerVoiceCall, ${ jsonEncode(callInfo.toMap())}");
     _channel.invokeMethod<void>('voiceCall', jsonEncode(callInfo.toMap()));
   }
 
