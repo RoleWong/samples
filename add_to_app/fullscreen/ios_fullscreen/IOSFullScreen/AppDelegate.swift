@@ -19,13 +19,13 @@ extension Dictionary {
 }
 
 @UIApplicationMain
-class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
+class AppDelegate: FlutterAppDelegate {
   lazy var flutterEngines = FlutterEngineGroup(name: "chat.flutter.tencent", project: nil)
 
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
       
       if #available(iOS 10.0, *) {
-        UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+        UNUserNotificationCenter.current().delegate = self
       }
       
       if let remoteNotification = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification]{
@@ -34,10 +34,6 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
           FlutterUtils.shared.triggerNotification(msg: remoteNotificationString)
       }
       
-    // Runs the default Dart entrypoint with a default Flutter route.
-//    flutterEngine.run();
-    // Used to connect plugins (only if you have plugins with iOS platform code).
-//    GeneratedPluginRegistrant.register(with: self.flutterEngines);
     return super.application(application, didFinishLaunchingWithOptions: launchOptions);
   }
     
