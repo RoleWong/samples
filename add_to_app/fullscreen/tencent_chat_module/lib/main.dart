@@ -37,6 +37,7 @@ void chatMain() {
   // This call ensures the Flutter binding has been set up before creating the
   // MethodChannel-based model.
   WidgetsFlutterBinding.ensureInitialized();
+  
 
   final model = ChatInfoModel();
 
