@@ -1,4 +1,4 @@
-# flutter_module
+# tencent_chat_module
 
 An example Flutter module used in the Flutter add-to-app samples. For more
 information on how to use it, see the [README.md](../README.md) parent

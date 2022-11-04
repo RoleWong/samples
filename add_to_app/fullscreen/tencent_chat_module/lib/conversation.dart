@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_module/push.dart';
+import 'package:tencent_chat_module/push.dart';
 import 'package:provider/provider.dart';
 import 'package:tim_ui_kit/business_logic/view_models/tui_chat_global_model.dart';
 import 'package:tim_ui_kit/tim_ui_kit.dart';

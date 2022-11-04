@@ -29,7 +29,6 @@ class AppDelegate: FlutterAppDelegate { // More on the FlutterAppDelegate.
       }
       
       if let remoteNotification = launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification]{
-          // 处理用户收到推送后的响应
           let notificationExt: [AnyHashable:Any] = remoteNotification as! [AnyHashable:Any]
           let remoteNotificationString: String = notificationExt.jsonStringRepresentaiton ?? "{}"
           FlutterUtils.shared.triggerNotification(msg: remoteNotificationString)
