@@ -7,8 +7,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_module/conversation.dart';
-import 'package:flutter_module/push.dart';
+import 'package:tencent_chat_module/conversation.dart';
+import 'package:tencent_chat_module/push.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:synchronized/synchronized.dart';

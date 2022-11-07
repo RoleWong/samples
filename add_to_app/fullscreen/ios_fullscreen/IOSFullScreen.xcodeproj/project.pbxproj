@@ -185,12 +185,12 @@
 			buildConfigurationList = 26DF66FC233136470076ACA6 /* Build configuration list for PBXNativeTarget "IOSFullScreen" */;
 			buildPhases = (
 				9CF5D07F6086396A068F60B5 /* [CP] Check Pods Manifest.lock */,
-				D17212EC506BB60A51272432 /* [CP-User] Run Flutter Build flutter_module Script */,
+				D17212EC506BB60A51272432 /* [CP-User] Run Flutter Build tencent_chat_module Script */,
 				26DF66D0233136460076ACA6 /* Sources */,
 				26DF66D1233136460076ACA6 /* Frameworks */,
 				26DF66D2233136460076ACA6 /* Resources */,
 				CB123FD4E9FD5858CE6CB610 /* [CP] Embed Pods Frameworks */,
-				AE8EAA17195288947B6DEC7A /* [CP-User] Embed Flutter Build flutter_module Script */,
+				AE8EAA17195288947B6DEC7A /* [CP-User] Embed Flutter Build tencent_chat_module Script */,
 			);
 			buildRules = (
 			);
@@ -377,15 +377,15 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AE8EAA17195288947B6DEC7A /* [CP-User] Embed Flutter Build flutter_module Script */ = {
+		AE8EAA17195288947B6DEC7A /* [CP-User] Embed Flutter Build tencent_chat_module Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			name = "[CP-User] Embed Flutter Build flutter_module Script";
+			name = "[CP-User] Embed Flutter Build tencent_chat_module Script";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../flutter_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../tencent_chat_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
 		};
 		CB123FD4E9FD5858CE6CB610 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -404,15 +404,15 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IOSFullScreen/Pods-IOSFullScreen-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D17212EC506BB60A51272432 /* [CP-User] Run Flutter Build flutter_module Script */ = {
+		D17212EC506BB60A51272432 /* [CP-User] Run Flutter Build tencent_chat_module Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			name = "[CP-User] Run Flutter Build flutter_module Script";
+			name = "[CP-User] Run Flutter Build tencent_chat_module Script";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../flutter_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../tencent_chat_module/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
 		};
 /* End PBXShellScriptBuildPhase section */
 

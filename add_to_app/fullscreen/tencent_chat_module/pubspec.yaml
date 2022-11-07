@@ -1,4 +1,4 @@
-name: flutter_module
+name: tencent_chat_module
 description: An example Flutter module.
 
 version: 1.0.0+1
@@ -37,5 +37,5 @@ flutter:
   # identifiers, which may be completely independent or the same as these.
   module:
     androidX: true
-    androidPackage: dev.flutter.example.flutter_module
+    androidPackage: dev.flutter.example.tencent_chat_module
     iosBundleIdentifier: dev.flutter.example.flutterModule
